@@ -1,0 +1,85 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statistics as st
+import os
+import glob
+
+path = r"C:\Users\USER\Desktop\pH reading(Ujjal bhaiya)\Ph Sensing 17-03-2022"
+files = glob.glob(path + "/*.csv")
+print(files)
+
+
+median_1 = []
+li = []
+l = []
+
+for filename in files:
+    df = pd.read_csv(filename, index_col=None, header=2, sep=';')
+    df.columns =['pH', 'Potential']
+    median_1.append(df['Potential'].median())
+    j = os.path.basename(filename.split(".")[0])
+    j_1 = int(j)
+    l.append(j_1)
+    df.pH = j_1
+    li.append(df)
+    
+
+
+print(median_1)
+print(l)
+frame = pd.concat(li, axis=0, ignore_index=True)
+display(frame)
+
+
+plt.rcParams["figure.figsize"] = [15, 10]
+plt.rcParams["figure.autolayout"] = True
+
+X = l
+Y = median_1
+
+def best_fit(X, Y):
+
+    xbar = sum(X)/len(X)
+    ybar = sum(Y)/len(Y)
+    n = len(X) # or len(Y)
+
+    numer = sum([xi*yi for xi,yi in zip(X, Y)]) - n * xbar * ybar
+    denum = sum([xi**2 for xi in X]) - n * xbar**2
+
+    b = numer / denum
+    a = ybar - b * xbar
+
+    print('best fit line:\ny = {:.2f} + {:.5f}x'.format(a, b))
+
+    return a, b
+
+# solution
+a, b = best_fit(X, Y)
+#best fit line:
+#y = 0.80 + 0.92x
+
+# plot points and fit line
+
+plt.scatter(X, Y)
+yfit = [a + b * xi for xi in X]
+plt.plot(X, yfit)
+
+for i, j in zip(X, Y):
+   plt.text(i, j, '({}, {})'.format(i, j))
+
+
+plt.rcParams["figure.figsize"] = [10, 7.5]
+plt.rcParams["figure.autolayout"] = True
+
+x = frame.pH
+y = frame.Potential
+
+plt.plot(y)
+
+for i, j in zip(X, Y):
+   plt.text(i, j, '({}, {})'.format(i, j))
+
+
+
+plt.show()
